@@ -20,9 +20,9 @@ def cross_entropy(actual, predict, eps=1e-15):
     return -1.0 * loss.mean()
 
 
-def gradient_descent(X, y, y_hot, num_epoch=100, learning_rate=1.0):
-    num_features = X.shape[1]
-    num_hidden_layer = 3
+def gradient_descent(X_train, y, y_hot, num_epoch=300, learning_rate=0.000001):
+    num_features = X_train.shape[1]
+    num_hidden_layer = 1000
 
     # w = np.random.uniform(low=-1.0, high=1.0, size=num_features)
     # b = np.random.uniform(low=-1.0, high=1.0)
@@ -30,32 +30,31 @@ def gradient_descent(X, y, y_hot, num_epoch=100, learning_rate=1.0):
     w1 = np.random.uniform(low=-1.0, high=1.0, size=(num_features, num_hidden_layer))
     b1 = np.random.uniform(low=-1.0, high=1.0, size=(1, num_hidden_layer))
 
-    w2 = np.random.uniform(low=-1.0, high=1.0, size=(num_hidden_layer, 1))
-    b2 = np.random.uniform(low=-1.0, high=1.0, size=(1, 1))
+    w2 = np.random.uniform(low=-1.0, high=1.0, size=(num_hidden_layer, 10))
+    b2 = np.random.uniform(low=-1.0, high=1.0, size=(1, 10))
 
     for epoch in range(num_epoch):
         # forward propagation
-        z1 = X.dot(w1) + b1
+        z1 = X_train.dot(w1) + b1
         a1 = sigmoid(z1)
         z2 = a1.dot(w2) + b2
         a2 = sigmoid(z2)
 
-        predict = a2.argmax(axis=1)
+        predict = np.argmax(a2, axis=1)
         cross_ntropy = cross_entropy(y_hot, a2)
         accuracy = (predict == y).mean()
 
-        if epoch % 10 == 0:
-            print(f"{epoch:2} accuracy = {accuracy:.6f} cross_entropy = {cross_ntropy:.6f}")
+        print(f"{epoch:2} accuracy = {accuracy:.6f} cross_entropy = {cross_ntropy:.6f}")
 
         if accuracy == 1.0:
             break
 
         # back propagation
-        d2 = a2 - y
+        d2 = a2 - y_hot
         d1 = d2.dot(w2.T) * a1 * (1 - a1)
 
         w2 = w2 - learning_rate * a1.T.dot(d2)
-        w1 = w1 - learning_rate * X.T.dot(d1)
+        w1 = w1 - learning_rate * X_train.T.dot(d1)
         b2 = b2 - learning_rate * d2.mean(axis=0)
         b1 = b1 - learning_rate * d1.mean(axis=0)
 
